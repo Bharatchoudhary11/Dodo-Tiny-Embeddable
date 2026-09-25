@@ -1,11 +1,17 @@
+import Checkout from "./pages/Checkout";
+
 function App() {
+  if (window.location.hash === "#/checkout") {
+    return <Checkout />;
+  }
+
   return (
     <main className="milestone-page">
       <p className="eyebrow">Tiny Embeddable Checkout</p>
-      <h1>Part 1: SDK foundation</h1>
+      <h1>Part 2: Checkout app</h1>
       <p className="intro">
-        The standalone SDK is ready. The checkout iframe and demo host will be
-        added in the next two parts.
+        The SDK foundation and isolated checkout iframe are ready. The demo
+        host will be added in the final part.
       </p>
       <div className="milestones" aria-label="Project milestones">
         <div className="milestone milestone-complete">
@@ -15,7 +21,7 @@ function App() {
             <p>Expose DodoCheckout.open() from one drop-in TypeScript file.</p>
           </div>
         </div>
-        <div className="milestone">
+        <div className="milestone milestone-complete">
           <span>02</span>
           <div>
             <strong>Checkout app</strong>
