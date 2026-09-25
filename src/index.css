@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --color-lime-50: #f7ffe6;
+  --color-lime-100: #eeffcc;
+  --color-lime-200: #dcff99;
+  --color-lime-300: #c6fe1e;
+  --color-lime-400: #b8f010;
+  --color-lime-500: #a3d916;
+  --color-lime-600: #80b30f;
+  --color-lime-700: #5e8a0a;
+  --color-lime-800: #3d5c06;
+  --color-lime-900: #1f2e03;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+.milestone-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 96px 24px;
+}
+
+.eyebrow {
+  color: #5e8a0a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: #17210a;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.intro {
+  color: #536047;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 24px 0 48px;
+  max-width: 560px;
+}
+
+.milestones {
+  display: grid;
+  gap: 12px;
+}
+
+.milestone {
+  align-items: flex-start;
+  border: 1px solid #dce4d0;
+  border-radius: 12px;
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+}
+
+.milestone > span {
+  color: #9ca995;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding-top: 2px;
+}
+
+.milestone strong {
+  color: #17210a;
+  display: block;
+  font-size: 1rem;
+}
+
+.milestone p {
+  color: #6d7866;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+
+.milestone-complete {
+  background: #f4fbdc;
+  border-color: #c6fe1e;
+}
+
+.milestone-complete > span {
+  color: #5e8a0a;
+}
