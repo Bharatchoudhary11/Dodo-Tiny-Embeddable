@@ -93,20 +93,20 @@ body {
 }
 
 @keyframes button-shimmer {
-
-  @keyframes cursor-orbit {
-    from {
-      transform: rotate(0deg) translateX(3px) rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg) translateX(3px) rotate(-360deg);
-    }
-  }
   0%, 55% {
     transform: translateX(-140%) rotate(18deg);
   }
   100% {
     transform: translateX(240%) rotate(18deg);
+  }
+}
+
+@keyframes cursor-orbit {
+  from {
+    transform: rotate(0deg) translateX(3px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(3px) rotate(-360deg);
   }
 }
 
@@ -1324,6 +1324,10 @@ h1 {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+
+  .cursor-orbit {
+    display: none;
+  }
 }
 
 :root {
@@ -1384,10 +1388,6 @@ h1 {
 
 .demo-header {
   border-color: rgba(243, 239, 231, 0.14);
-
-  .cursor-orbit {
-    display: none;
-  }
 }
 
 .demo-brand strong,
