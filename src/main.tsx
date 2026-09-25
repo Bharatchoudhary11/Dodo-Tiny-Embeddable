@@ -1,3 +1,4 @@
+// Boots the React application and loads the shared demo and checkout styles.
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";

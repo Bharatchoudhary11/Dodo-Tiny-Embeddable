@@ -1,3 +1,4 @@
+// Isolated iframe checkout: owns payment fields, validation, fake card outcomes, and checkout state.
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type CheckoutState = "loading" | "form" | "processing" | "success";
@@ -18,7 +19,7 @@ type CheckoutMessage =
   | { type: "DODO_SUCCESS"; payload: { sessionId: string } }
   | { type: "DODO_ERROR"; payload: { code: string; message: string } }
   | { type: "DODO_CLOSE"; payload: { reason: string } }
-  | { type: "DODO_STATE_CHANGE"; payload: { state: CheckoutState } };
+  | { type: "DODO_STATE_CHANGE"; payload: { state: string } };
 
 const products: Record<string, Product> = {
   prod_123: {
@@ -72,6 +73,7 @@ function createSessionId(): string {
 }
 
 function Checkout() {
+  // The checkout keeps payment fields and card outcomes inside the iframe.
   const [state, setState] = useState<CheckoutState>("loading");
   const [product, setProduct] = useState<Product>(products.prod_123);
   const [email, setEmail] = useState("");
@@ -90,6 +92,7 @@ function Checkout() {
   }
 
   useEffect(() => {
+    // The iframe receives product data and close requests through postMessage.
     function handleMessage(event: MessageEvent<ParentMessage>): void {
       if (event.source !== window.parent) return;
       if (event.origin) parentOrigin.current = event.origin;
@@ -116,27 +119,38 @@ function Checkout() {
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+    // Validation happens before the fake payment delay and never exposes field values to the host.
     event.preventDefault();
     if (state === "processing") return;
 
     const digits = cardNumber.replace(/\D/g, "");
     const expiryDigits = expiry.replace(/\D/g, "");
     const expiryMonth = Number(expiryDigits.slice(0, 2));
+    const expiryYear = Number(expiryDigits.slice(2, 4));
+    const now = new Date();
+    const currentYear = now.getFullYear() % 100;
+    const currentMonth = now.getMonth() + 1;
 
     if (!email.includes("@")) {
-      setErrorMessage("Enter a valid email address.");
+      reportValidationError("email", "Enter a valid email address.");
       return;
     }
     if (digits.length !== 16 || !passesLuhn(digits)) {
-      setErrorMessage("Enter a valid 16-digit card number.");
+      reportValidationError("card_number", "Enter a valid 16-digit card number.");
       return;
     }
-    if (expiryDigits.length !== 4 || expiryMonth < 1 || expiryMonth > 12) {
-      setErrorMessage("Enter an expiry date in MM / YY format.");
+    if (
+      expiryDigits.length !== 4 ||
+      expiryMonth < 1 ||
+      expiryMonth > 12 ||
+      expiryYear < currentYear ||
+      (expiryYear === currentYear && expiryMonth < currentMonth)
+    ) {
+      reportValidationError("expiry", "Enter an expiry date in the future.");
       return;
     }
     if (cvc.length < 3) {
-      setErrorMessage("Enter a valid security code.");
+      reportValidationError("cvc", "Enter a valid security code.");
       return;
     }
 
@@ -156,7 +170,7 @@ function Checkout() {
     if (digits === "4000000000000341" && retryCount.current === 0) {
       retryCount.current += 1;
       setState("form");
-      setErrorMessage("Payment failed once. Press Pay again to retry.");
+      setErrorMessage("Enter a valid card number.");
       send({ type: "DODO_ERROR", payload: { code: "processing_error", message: "Payment failed. Retry available." } });
       send({ type: "DODO_STATE_CHANGE", payload: { state: "form" } });
       return;
@@ -171,6 +185,13 @@ function Checkout() {
 
   function closeCheckout(): void {
     send({ type: "DODO_CLOSE", payload: { reason: "user_closed" } });
+  }
+
+  function reportValidationError(field: string, message: string): void {
+    // Send only the invalid field name and safe error copy to the host Event Log.
+    setErrorMessage(message);
+    send({ type: "DODO_ERROR", payload: { code: `invalid_${field}`, message } });
+    send({ type: "DODO_STATE_CHANGE", payload: { state: `validation_error:${field}` } });
   }
 
   const price = new Intl.NumberFormat("en-US", {
@@ -223,7 +244,9 @@ function Checkout() {
                     <input id="cvc" inputMode="numeric" autoComplete="cc-csc" maxLength={4} value={cvc} onChange={(event) => setCvc(event.target.value.replace(/\D/g, ""))} placeholder="123" />
                   </div>
                 </div>
-                {errorMessage && <div className="error-message" role="alert">{errorMessage}</div>}
+                <div className={`error-message${errorMessage ? "" : " error-placeholder"}`} role={errorMessage ? "alert" : undefined}>
+                  {errorMessage}
+                </div>
                 <button className="pay-button" type="submit" disabled={state === "processing"}>
                   {state === "processing" ? "Processing..." : `Pay ${price}`}
                 </button>
@@ -234,6 +257,18 @@ function Checkout() {
           ) : null}
         </div>
       </section>
+      {state === "processing" && (
+        <div className="processing-overlay" role="status" aria-live="polite">
+          <div className="processing-modal">
+            <span className="processing-orbit" aria-hidden="true">
+              <i />
+            </span>
+            <strong>Securing your payment</strong>
+            <p>We are confirming the transaction...</p>
+            <div className="processing-progress" aria-hidden="true"><span /></div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

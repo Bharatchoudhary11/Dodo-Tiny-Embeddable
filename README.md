@@ -1,12 +1,12 @@
 
 
-A tiny embeddable checkout built in three steps. Parts 1 and 2 are implemented: the SDK creates an isolated iframe, and the checkout app handles the payment form inside it.
+A tiny embeddable checkout built in three steps: a drop-in SDK, an isolated payment form, and a demo host page.
 
 ## Build Steps
 
 1. **SDK foundation** (`public/sdk/dodo-checkout.ts`) - expose `DodoCheckout.open()`, create the checkout overlay, and define the host/iframe message contract.
 2. **Checkout app** (`src/pages/Checkout.tsx`) - render the product, email, card, expiry, and CVC fields inside the iframe and process fake payment states.
-3. **Demo site** - add a host page with a Buy button and a visible callback event log.
+3. **Demo site** (`src/pages/Demo.tsx`) - provide a store-like host page with a Buy button and a visible callback event log.
 
 ## Communication
 
@@ -29,7 +29,7 @@ pnpm install
 pnpm dev
 ```
 
-Open the checkout directly at <http://localhost:3000/#/checkout>. If port 3000 is already in use, start Vite on another port:
+Open <http://localhost:3000> for the demo site. To inspect the checkout directly, open <http://localhost:3000/#/checkout>. If port 3000 is already in use, start Vite on another port:
 
 ```bash
 pnpm exec vite --port 3001

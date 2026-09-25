@@ -1,6 +1,9 @@
 /**
  * Dodo Payments Checkout SDK
  *
+ * This file is the drop-in host script: it creates the iframe, isolates card
+ * fields from the host page, and forwards safe checkout events to callbacks.
+ *
  * Usage:
  *   <script src="https://your-cdn.com/dodo-checkout.js"></script>
  *   <script>
@@ -105,6 +108,7 @@ interface Window {
   })();
 
   function cleanup(): void {
+    // Remove the overlay and listeners after success or close.
     if (messageHandler) {
       window.removeEventListener("message", messageHandler);
       messageHandler = null;
@@ -117,6 +121,10 @@ interface Window {
 
     if (overlay && overlay.parentNode) {
       overlay.style.opacity = "0";
+      if (iframe) {
+        iframe.style.opacity = "0";
+        iframe.style.transform = "perspective(1200px) scale(0.86) rotateY(-10deg) translateY(18px)";
+      }
       const el = overlay;
       setTimeout(() => {
         if (el && el.parentNode) {
@@ -131,6 +139,7 @@ interface Window {
   }
 
   function handleMessage(event: MessageEvent): void {
+    // Translate iframe messages into the callbacks supplied by the host page.
     const data = event.data as Partial<CheckoutMessage> | undefined;
 
     if (!data || typeof data.type !== "string" || !data.type.startsWith("DODO_")) {
@@ -176,6 +185,7 @@ interface Window {
 
   const dodoCheckout: DodoCheckout = {
     open(config: DodoCheckoutConfig): void {
+      // Create one isolated checkout iframe and ignore duplicate opens.
       if (!config || !config.productId) {
         console.error("[DodoCheckout] productId is required");
         return;
@@ -200,13 +210,16 @@ interface Window {
         "position:fixed;inset:0;z-index:2147483647;" +
         "background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);" +
         "display:flex;align-items:center;justify-content:center;" +
-        "opacity:0;transition:opacity 0.25s ease;overflow:hidden;";
+        "opacity:0;transition:opacity 0.3s ease;overflow:hidden;perspective:1200px;";
 
       iframe = document.createElement("iframe");
       iframe.src = CHECKOUT_URL;
       iframe.style.cssText =
-        "width:460px;max-width:calc(100vw - 32px);height:580px;max-height:calc(100vh - 32px);" +
-        "border:none;background:transparent;border-radius:16px;";
+        "width:460px;max-width:calc(100vw - 16px);height:613px;max-height:calc(100vh - 12px);" +
+        "border:none;background:transparent;border-radius:16px;opacity:0;" +
+        "transform:perspective(1200px) scale(0.86) rotateY(-10deg) translateY(18px);" +
+        "transform-origin:center center;transition:opacity 0.42s cubic-bezier(0.22,1,0.36,1)," +
+        "transform 0.52s cubic-bezier(0.22,1,0.36,1);";
       iframe.setAttribute("allow", "payment");
       iframe.setAttribute("title", "Secure Checkout");
 
@@ -214,7 +227,11 @@ interface Window {
       document.body.appendChild(overlay);
 
       requestAnimationFrame(() => {
-        if (overlay) overlay.style.opacity = "1";
+        if (overlay && iframe) {
+          overlay.style.opacity = "1";
+          iframe.style.opacity = "1";
+          iframe.style.transform = "perspective(1200px) scale(1) rotateY(0deg) translateY(0)";
+        }
       });
 
       messageHandler = handleMessage;
