@@ -245,6 +245,35 @@ h1 {
   font-size: 0.72rem;
 }
 
+.checkout-header-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.checkout-close-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: #718066;
+  cursor: pointer;
+  display: none;
+  font: inherit;
+  font-size: 1.35rem;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0 0 3px;
+  width: 32px;
+}
+
+.checkout-close-button:hover {
+  background: #e9f1ed;
+  border-color: #c5dbd1;
+  color: #17242a;
+}
+
 .checkout-content {
   padding: 18px 20px 14px;
 }
@@ -1527,5 +1556,13 @@ h1 {
 
   .product-card-head > strong {
     margin-left: auto;
+  }
+
+  .checkout-close-button {
+    display: flex;
+  }
+
+  .secure-label {
+    display: none;
   }
 }

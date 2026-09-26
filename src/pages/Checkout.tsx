@@ -207,7 +207,12 @@ function Checkout() {
             <span className="brand-mark">D</span>
             <span className="brand-name">Dodo Payments</span>
           </div>
-          <span className="secure-label">Secure checkout</span>
+          <div className="checkout-header-actions">
+            <span className="secure-label">Secure checkout</span>
+            <button className="checkout-close-button" type="button" onClick={closeCheckout} aria-label="Close checkout">
+              ×
+            </button>
+          </div>
         </header>
 
         <div className="checkout-content">
